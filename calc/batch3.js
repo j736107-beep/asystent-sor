@@ -7,11 +7,18 @@ var SRC={
  af:['ESC 2024 AF (Van Gelder)','ACC/AHA/ACCP/HRS 2023 AF','ChPL Betaloc (metoprolol i.v.)','ChPL Cordarone (amiodaron)','ChPL Lanoxin (digoksyna)','ChPL Tambocor (flekainid)'],
  gi:['ESGE 2021 – krwawienie z górnego odc. nieżylakowe','ACG 2021 – UGIB','Baveno VII 2022 – nadciśnienie wrotne','ChPL Glypressin (terlipresyna)','ChPL pantoprazol i.v.','Blatchford 2000 (Lancet)']};
 // ---------- ANAFILAKSJA ----------
-function adrIM(w,age){var mg;if(nz(age)&&age<12){mg=age<6?0.15:0.3;}else mg=nz(w)&&w>0?Math.min(0.01*w,0.5):0.5;return{mg:mg,ml:mg/1}; }
+// Adrenalina i.m. 1 mg/ml (ChPL Adrenalina WZF 1 mg/ml, p. 4.2): <6 mies. 0,01 mg/kg; 6 mies.–6 lat 0,15 mg; 6–12 lat 0,3 mg; >12 lat 0,5 mg (tekst ChPL: 10 µg/kg, maks. 0,5 mg).
+// Wiek w LATACH (ułamek dozwolony: 0,25 = 3 mies.). Niemowlę <6 mies. bez masy → brak dawki (needW) – dawka stała 0,15 mg byłaby >10× za duża.
+function adrIM(w,age){var mg=null,needW=false,note='';
+ if(nz(age)&&age>=0&&age<0.5){if(nz(w)&&w>0)mg=Math.round(0.01*w*1000)/1000;else needW=true;note='Niemowlę <6 mies.: 0,01 mg/kg (ChPL) – dawki stałej nie stosować.';}
+ else if(nz(age)&&age>=0.5&&age<6){mg=0.15;}
+ else if(nz(age)&&age>=6&&age<12){mg=0.3;}
+ else{mg=nz(w)&&w>0?Math.min(0.01*w,0.5):0.5;if(nz(w)&&w>0&&w<50&&nz(age)&&age>=12)note='ChPL (tabela wiekowa): >12 lat 0,5 mg; tu 10 µg/kg (maks. 0,5 mg) wg tekstu ChPL – DO DECYZJI LEKARZA.';}
+ return{mg:mg,ml:mg==null?null:mg/1,needW:needW,note:note};}
 function anaFluid(w,age){if(nz(age)&&age<18&&w>0)return{ml:10*w,txt:'10 ml/kg krystaloidu'};return{ml:[500,1000],txt:'500–1000 ml krystaloidu'};}
 function glucagon(){return{lo:1,hi:5,txt:'Glukagon 1–5 mg i.v. w 5 min, potem 5–15 µg/min (beta-bloker)'};}
 // ---------- SEPSA ----------
-function map(sbp,dbp){return nz(sbp)&&nz(dbp)?(sbp+2*dbp)/3:NaN;}
+function map(sbp,dbp){return nz(sbp)&&nz(dbp)&&sbp>0&&dbp>0&&sbp<=300&&dbp<=200?(sbp+2*dbp)/3:NaN;}
 function sepsis(i){var o={lvl:'ok',w:[]};o.map=nz(i.map)?i.map:map(i.sbp,i.dbp);
  o.hypo=(nz(o.map)&&o.map<65)||(nz(i.sbp)&&i.sbp<90);o.lacHi=nz(i.lac)&&i.lac>=4;
  o.fluid=(o.hypo||o.lacHi)&&i.w>0?30*i.w:0;if(o.hypo||o.lacHi)o.lvl='red';else if(nz(i.lac)&&i.lac>=2)o.lvl='orange';
@@ -32,7 +39,7 @@ function para(i){var o={lvl:'ok'};o.mgkg=paraDose(i.mg,i.w);o.uk=paraLine(i.t,10
  if(nz(i.level)&&nz(o.uk)){o.aboveUK=i.level>=o.uk;o.aboveUS=i.level>=o.us;}
  if(o.aboveUK||(nz(o.mgkg)&&o.mgkg>=150)||i.stag)o.lvl='red';else if(nz(o.mgkg)&&o.mgkg>=75)o.lvl='orange';return o;}
 function naloxone(dep){return dep?{start:0.04,txt:'40 µg i.v., powtarzaj co 2–3 min (uzależnienie – ryzyko odstawienia)'}:{start:0.4,txt:'0,4 mg i.v./i.m./i.n., powtarzaj co 2–3 min do 2 mg'};}
-function naloxInf(eff){return nz(eff)?eff*2/3:NaN;} // 2/3 dawki skutecznej na godzinę
+function naloxInf(eff){return nz(eff)&&eff>0&&eff<=20?eff*2/3:NaN;} // 2/3 dawki skutecznej na godzinę
 function flumazenil(i){var o={lvl:'ok',txt:'0,2 mg i.v. w 15 s, potem 0,1 mg co 60 s, maks. 1 mg',max:1};
  var bad=[];if(i.tca)bad.push('TLPD/leki prodrgawkowe');if(i.chronic)bad.push('przewlekłe BZD');if(i.seiz)bad.push('padaczka');if(i.unk)bad.push('nieznana mieszanina');
  if(bad.length){o.lvl='red';o.bad=bad;}return o;}
@@ -44,7 +51,7 @@ function afRate(w,i){var o=[];o.push({n:'Metoprolol i.v.',d:'2,5–5 mg w 2 min,
  o.push({n:'Digoksyna i.v.',d:'0,5 mg, potem 0,25 mg co 6 h, maks. 1,5 mg/24 h',lvl:nz(i.crcl)&&i.crcl<30?'orange':'ok'});
  o.push({n:'Amiodaron i.v.',d:'300 mg w 250 ml G5% w 30–60 min, potem 900 mg/24 h',lvl:'ok'});return o;}
 function fmtn(x){return (Math.round(x*10)/10).toString().replace('.',',');}
-function afRhythm(w,i){var o=[];if(w>0){var lo=5*w,hi=7*w;o.push({n:'Amiodaron',d:fmtn(lo)+'–'+fmtn(hi)+' mg (5–7 mg/kg) w 1–2 h, potem 50 mg/h, maks. 1,2 g/24 h',lvl:'ok'});
+function afRhythm(w,i){var o=[];if(w>0&&w<=250){var lo=5*w,hi=7*w;o.push({n:'Amiodaron',d:fmtn(lo)+'–'+fmtn(hi)+' mg (5–7 mg/kg) w 1–2 h, potem 50 mg/h, maks. 1,2 g/24 h',lvl:'ok'});
  var fl=Math.min(2*w,150);o.push({n:'Flekainid',d:fmtn(fl)+' mg (2 mg/kg, maks. 150) w 10 min',lvl:i.structural?'red':'ok'});}
  return o;}
 // ---------- GI ----------

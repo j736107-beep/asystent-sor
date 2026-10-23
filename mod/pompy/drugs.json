@@ -1,6 +1,6 @@
 {
- "version": 5,
- "built": "2026-10-14",
+ "version": 6,
+ "built": "2026-10-24",
  "disclaimer": "Narzędzie pomocnicze — zweryfikuj z protokołem szpitala i ChPL",
  "sources": {
   "FEN": {
@@ -121,7 +121,9 @@
     ]
    },
    "maxConc": null,
-   "note": null
+   "note": "Ampułka 1 mg/ml – NIE do wstrzyknięcia i.v. bez rozcieńczenia (ChPL). Wlew: 0,05–0,5 µg/kg/min (ChPL do 1,0). Stężenie roboczej mieszanki (5 mg/50 ml = 100 µg/ml) – DO DECYZJI LEKARZA / lokalna receptura.",
+   "hard": 1.0,
+   "hardText": "Powyżej 1 µg/kg/min (ChPL – górna granica wlewu) – nie liczę; sprawdź jednostkę (µg/kg/min vs µg/min)."
   },
   {
    "id": "amiodaron",
@@ -189,7 +191,9 @@
     ]
    },
    "maxConc": null,
-   "note": null
+   "note": null,
+   "hard": 40,
+   "hardText": "Powyżej 40 µg/kg/min – nie liczę; sprawdź jednostkę."
   },
   {
    "id": "dopamina",
@@ -221,7 +225,9 @@
     ]
    },
    "maxConc": null,
-   "note": "Twoja baza nie ma standardu strzykawki dla dopaminy — stężenie zatwierdź lokalnie."
+   "note": "Twoja baza nie ma standardu strzykawki dla dopaminy — stężenie zatwierdź lokalnie.",
+   "hard": 50,
+   "hardText": "Powyżej 50 µg/kg/min – nie liczę; sprawdź jednostkę."
   },
   {
    "id": "fentanyl",
@@ -289,24 +295,26 @@
     ]
    },
    "maxConc": null,
-   "note": null
+   "note": null,
+   "hard": 100,
+   "hardText": "Powyżej 100 mg/h – nie liczę; sprawdź jednostkę."
   },
   {
    "id": "heparyna",
    "name": "Heparyna",
    "amp": {
-    "content": 25000,
+    "content": 1,
     "unit": "j",
-    "volume": 5,
-    "label": "fiolka 25 000 j. / 5 ml",
+    "volume": 0.0002,
+    "label": "Heparinum WZF 5000 j.m./ml (fiolka 5 ml = 25 000 j.m.)",
     "src": [
      "HEP"
     ]
    },
    "diluted": true,
    "defaults": {
-    "50": 1,
-    "20": 1,
+    "50": 25000,
+    "20": 10000,
     "src": [
      "LOC"
     ]
@@ -329,7 +337,15 @@
      "HEP"
     ]
    },
-   "note": null
+   "note": "Wartości domyślne: 25 000 j.m. w 50 ml i 10 000 j.m. w 20 ml (500 j.m./ml – w limicie ChPL ≤1000 j.m./ml). Cała fiolka 25 000 j.m. w strzykawce 20 ml dałaby 1250 j.m./ml – powyżej limitu, wynik jest wtedy wstrzymywany. Receptura i zakres aPTT/anti-Xa – DO DECYZJI LEKARZA (lokalnie).",
+   "header": "Heparinum WZF 5000 j.m./ml (fiolka 5 ml = 25 000 j.m.)",
+   "stepper": {
+    "label": "Heparyna ze strzykawki/fiolki [j.m.]",
+    "step": 5000,
+    "free": true
+   },
+   "hard": 5000,
+   "hardText": "Poza twardym limitem 5000 j.m./h – sprawdź jednostkę (j.m./h) i stężenie; bolus nie jest wliczany w ml/h."
   },
   {
    "id": "insulina",
@@ -370,7 +386,7 @@
      "INS"
     ]
    },
-   "note": "Pobranie z pena — praktyka lokalna (off-label).",
+   "note": "Pobranie z pena/wkładu = praktyka lokalna (off-label). ChPL NovoRapid: do wlewu i.v. dopuszczone wyłącznie fiolki (nie Penfill/FlexPen); worki polipropylenowe adsorbują insulinę. Rodzaj opakowania i sposób przygotowania – DO DECYZJI LEKARZA / apteka szpitalna.",
    "doseUnits": [
     "j/h",
     "j/kg/h"
@@ -380,6 +396,10 @@
     "label": "Liczba jednostek z pena [j.]",
     "step": 10,
     "free": true
+   },
+   "minConc": {
+    "value": 0.05,
+    "text": "ChPL: stężenie 0,05–1,0 j./ml"
    }
   },
   {
@@ -488,7 +508,9 @@
     ]
    },
    "maxConc": null,
-   "note": "Trinity nie ma ChPL w RPL — dawki wg Perlinganit."
+   "note": "Trinity nie ma ChPL w RPL — dawki wg Perlinganit.",
+   "hard": 200,
+   "hardText": "Powyżej 200 µg/min – nie liczę; sprawdź jednostkę (µg/min vs mg/h)."
   },
   {
    "id": "noradrenalina",
@@ -522,7 +544,14 @@
     ]
    },
    "maxConc": null,
-   "note": "Standard lokalny (Twoja baza): 4 mg/50 ml = 80 µg/ml; ChPL standardowo 40 µg/ml — inne stężenie dopuszczalne przy przeliczeniu."
+   "note": "Standard ChPL 40 µg/ml (2 mg/50 ml); standard lokalny 4 mg/50 ml = 80 µg/ml – DO DECYZJI LEKARZA (zatwierdzona lokalna receptura). Obwodowo tylko krótko (≤20 µg/ml, ≤0,1 µg/kg/min), potem centralny dostęp; wynaczynienie → fentolamina wg lokalnej procedury. Dawka w µg/kg/min (nie µg/min).",
+   "hard": 2.0,
+   "hardText": "Powyżej 2 µg/kg/min – nie liczę (twardy limit modułu AHF); sprawdź jednostkę (µg/kg/min vs µg/min) i masę.",
+   "softConc": {
+    "value": 0.04,
+    "text": "ChPL: standard 40 µg/ml (2 mg/50 ml). 80 µg/ml (4 mg/50 ml) = lokalna receptura – DO DECYZJI LEKARZA; obwodowo ≤20 µg/ml i ≤0,1 µg/kg/min, dłużej – dostęp centralny.",
+    "unit": "mg/ml (=40 µg/ml)"
+   }
   },
   {
    "id": "oktreotyd",

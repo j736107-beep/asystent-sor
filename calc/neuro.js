@@ -25,14 +25,17 @@ function nihss(v){var s=0,n=0;NIH.forEach(function(it){var x=v[it[0]];if(x==='UN
 // ---------- tromboliza ----------
 function alteplase(w){if(!(w>0))return null;var dw=Math.min(w,100),tot=Math.round(dw*0.9*10)/10,bol=Math.round(tot*0.1*10)/10,inf=Math.round((tot-bol)*10)/10;
  return{tot:tot,bol:bol,inf:inf,mlh:inf,capped:w>100,conc:1};} // 1 mg/ml → ml = mg; wlew 60 min → ml/h = mg reszty
-function tenecteplase(w){if(!(w>0))return null;var mg=Math.round(Math.min(w*0.25,25)*10)/10;return{mg:mg,ml:Math.round(mg/5*10)/10,capped:w>100,conc:5};} // Metalyse 25 mg/5 ml
+// Metalyse w ostrym udarze (EPAR/ChPL, p. 4.2): DAWKA WG PRZEDZIAŁÓW MASY, nie 0,25 mg/kg: <60 kg 15 mg; 60–<70 17,5; 70–<80 20; 80–<90 22,5; ≥90 kg 25 mg (5 mg/ml → 3,0–5,0 ml).
+// ChPL: przy masie ≤50 kg dokładna ocena korzyści/ryzyka; ostrożność >80 lat. Wytyczne AHA/ESO podają 0,25 mg/kg (maks. 25 mg) – różnica do ~2,5 mg (masa 50–59 kg: 12,5–14,75 vs 15 mg).
+function tenecteplase(w){if(!(w>0))return null;var mg=w<60?15:w<70?17.5:w<80?20:w<90?22.5:25;var gl=Math.round(Math.min(w*0.25,25)*10)/10;
+ return{mg:mg,ml:Math.round(mg/5*10)/10,capped:w>=90,band:(w<60?'<60':w<70?'60–<70':w<80?'70–<80':w<90?'80–<90':'≥90')+' kg',lowWeight:w<=50,conc:5,guideline025:gl,diff:Math.round((mg-gl)*10)/10};}
 // okno czasowe: h od ostatniego widzenia zdrowego
 function window_(h,wake,mm){if(wake)return mm?{lvl:'orange',txt:'Wake-up / nieznany czas – tylko przy niedopasowaniu DWI-FLAIR (lub perfuzji) – ESO 2021 / AHA'}:{lvl:'red',txt:'Wake-up bez niedopasowania DWI-FLAIR/perfuzji – brak wskazań'};
  if(!nz(h))return{lvl:'',txt:'Podaj czas od zachorowania'};if(h<0)return{lvl:'red',txt:'Nieprawidłowy czas'};
  if(h<=4.5)return{lvl:'ok',txt:'≤4,5 h – okno trombolizy'};if(h<=9&&mm)return{lvl:'orange',txt:'4,5–9 h z niedopasowaniem perfuzji (ESO 2021, EXTEND) – decyzja neurologa'};
  return{lvl:'red',txt:'>4,5 h – poza standardowym oknem'};}
 var CI_ABS=[['ich','krwawienie śródczaszkowe w TK'],['hypo','rozległa hipodensja w TK (> 1/3 MCA)'],['sah','podejrzenie SAH'],['tbi','ciężki uraz głowy / udar niedokrwienny <3 mies.'],['neuro','operacja wewnątrzczaszkowa/rdzenia <3 mies.'],['gi','krwawienie z p.pok. <21 dni / aktywne krwawienie'],
- ['coag','PLT <100 tys., INR >1,7, APTT >40 s'],['lmwh','pełna dawka HDCz <24 h'],['doac','NOAC <48 h (bez prawidłowych testów)'],['endo','infekcyjne zapalenie wsierdzia'],['aorta','rozwarstwienie aorty'],['tumor','nowotwór wewnątrzosiowy OUN']];
+ ['coag','PLT <100 tys., INR >1,7 (ChPL Actilyse u VKA: >1,3), APTT >40 s'],['lmwh','pełna dawka HDCz <24 h'],['doac','NOAC <48 h (bez prawidłowych testów)'],['endo','infekcyjne zapalenie wsierdzia'],['aorta','rozwarstwienie aorty'],['tumor','nowotwór wewnątrzosiowy OUN']];
 var CI_REL=[['surg','duża operacja / uraz <14 dni'],['preg','ciąża / połóg'],['seiz','napad padaczkowy na początku'],['mi','zawał <3 mies.'],['art','nakłucie tętnicy niezaciskalnej <7 dni'],['bleed','przebyte krwawienie śródczaszkowe']];
 function ci(v){var a=CI_ABS.filter(function(c){return v[c[0]]}).map(function(c){return c[1]}),r=CI_REL.filter(function(c){return v[c[0]]}).map(function(c){return c[1]});return{abs:a,rel:r,lvl:a.length?'red':r.length?'orange':'ok'};}
 // ciśnienie: phase 'pre' <185/110, 'post' <180/105 (24 h)
@@ -42,7 +45,7 @@ function glu(mg){if(!nz(mg))return{lvl:''};if(mg<50)return{lvl:'red',txt:'Hipogl
 // ---------- ICH score ----------
 var ICH_MORT=[0,13,26,72,97,100,100];
 function ichScore(i){var s=0;if(nz(i.gcs)){s+=i.gcs<=4?2:i.gcs<=12?1:0;}if(i.vol>=30)s++;if(i.ivh)s++;if(i.infra)s++;if(nz(i.age)&&i.age>=80)s++;return{score:s,mort:ICH_MORT[s],lvl:s>=3?'orange':'ok'};}
-function abc2(a,b,c){if(!(a>0&&b>0&&c>0))return NaN;return a*b*c/2;} // cm → ml
+function abc2(a,b,c){if(!(a>0&&b>0&&c>0&&a<=25&&b<=25&&c<=25))return NaN;return a*b*c/2;} // cm → ml
 function ichBP(sbp){if(!nz(sbp))return{lvl:''};if(sbp>220)return{lvl:'red',txt:'SBP >220 – pilnie obniżaj (wlew), cel 140'};if(sbp>150)return{lvl:'orange',txt:'SBP 150–220 → obniż do ~140 mmHg (AHA 2022: 140; unikaj <130)'};if(sbp<130)return{lvl:'orange',txt:'SBP <130 – unikaj dalszego obniżania (AHA 2022: potencjalnie szkodliwe)'};return{lvl:'ok',txt:'SBP w celu (130–150)'};}
 // ---------- triage ----------
 var MRS=['0 – bez objawów','1 – bez istotnej niesprawności','2 – lekka niesprawność, samodzielny','3 – umiarkowana, chodzi sam, potrzebuje pomocy','4 – średnio ciężka, nie chodzi sam','5 – ciężka, leżący, stała opieka','6 – zgon'];
@@ -94,7 +97,7 @@ function stroke(i){var s=i.s||{},o=i.o||{},c=i.cvt||{},tu=i.tu||{},R=[],add=func
   if(i.sex==='f'&&nz(i.age)&&i.age>=12&&i.age<=50)add('orange','Test ciążowy','Kobieta w wieku rozrodczym – β-hCG (nie opóźnia obrazowania/trombolizy)',S_A+' · ChPL');
   add('ok','Na oddziale','Test połykania przed czymkolwiek doustnie (NPO); SpO₂ >94% (tlen tylko przy hipoksji); temp. <38 °C; wezgłowie płasko/≤30° (30° przy ↑ICP/aspiracji); unikaj hipotensji',S_A+' · '+S_PTN);}
  if(i.mimic)add('orange','Możliwy mimik','Nie wyklucza udaru – nie opóźniaj obrazowania; tromboliza u mimików ma niskie ryzyko',S_A);
- if(s.seiz&&deficit)add('orange','Napad na początku','Porażenie Todda vs udar – angio-TK/perfuzja rozstrzyga; napad nie jest bezwzględnym przeciwwskazaniem',S_A);
+ if(s.seiz&&deficit)add('orange','Napad na początku','Porażenie Todda vs udar – angio-TK/perfuzja rozstrzyga; wg ChPL Actilyse drgawki na początku udaru to przeciwwskazanie (Metalyse – tylko po wykluczeniu mimiku), wg AHA/ESO nie jest bezwzględne – DO DECYZJI LEKARZA',S_A);
  if(!R.length)add('','','Zaznacz objawy / czas.','');
  var lvl=R.some(function(r){return r.lvl==='red'})?'red':R.some(function(r){return r.lvl==='orange'})?'orange':'ok';return{list:R,lvl:lvl,f:f};}
 

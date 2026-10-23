@@ -72,7 +72,7 @@ var capT=null;function capSoon(){clearTimeout(capT);capT=setTimeout(function(){i
 ['input','change','click'].forEach(function(ev){$('#main').addEventListener(ev,capSoon,true);});
 window.SKS.capSoon=capSoon;
 function printParts(){var id=active&&active.id;if(id==='documentation')return['doc','done'];if(id==='fluid')return['fluid'];if(id==='pompy')return['pumps'];if(id==='treatment-log')return['done'];if(!id||['dashboard','settings','about','icd10','icd9','trends'].indexOf(id)>=0)return null;return[{module:id}];}
-$('#printMod').onclick=function(){SORReport.print(printParts()||undefined);};
+$('#printMod').onclick=function(){if(active&&active.id==='about'&&window.SORAbout){SORAbout.print(SORAbout.state.tab);return;}SORReport.print(printParts()||undefined);};
 $('#printAll').onclick=function(){SORReport.print();};
 // globalna zmiana jednostek: przelicza wpisane wartości (przechowywane w SI), etykiety i wyniki na żywo, bez przeładowania
 window.SKS.setUnits=function(u){u=u==='si'?'si':'conv';if(S.units===u)return;S.units=u;saveS();applyS();pcShow();patBar();

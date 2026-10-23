@@ -51,3 +51,8 @@ details.icd-group>summary{cursor:pointer}details.icd-group[open]>summary{margin-
 #pbmi.pill{white-space:nowrap}#ph{width:4.2em}
 #printArea .rp-text{white-space:pre-wrap;border:1px solid #888;padding:6px 8px;margin:4px 0;font-size:10.5pt}#printArea h3{font-size:11pt;margin:8px 0 3px}
 #main .dn-et{min-width:8.6em!important;width:8.6em!important}#main #dn-t{min-width:8.6em!important}
+/* 5.0-D: O programie / źródła */
+.ab-tabs{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.ab-tabs button{padding:8px 12px;border:1px solid #b9a9dc;border-radius:8px;background:#fff;cursor:pointer;font-size:.95rem}.ab-tabs button.on{background:#5b3fa0;color:#fff;border-color:#5b3fa0}
+.ab-t td,.ab-t th{font-size:.85rem}.ab-t a{word-break:break-word}.ab-src li,.ab-todo li{margin:4px 0;line-height:1.35}.ab-area{border-left:4px solid #b9a9dc;padding:4px 10px;margin:8px 0}
+.ab-lf{margin:10px 0}.ab-lf input{width:min(560px,100%);padding:7px;border:1px solid #bbb;border-radius:6px}.ab-lf input.bad{border-color:#d81b30;background:#fff1f2}.ab-dash{margin-top:12px}
+#printArea .ab-t td,#printArea .ab-t th{font-size:9pt}

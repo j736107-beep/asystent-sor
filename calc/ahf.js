@@ -5,7 +5,7 @@ function nz(x){return typeof x==='number'&&isFinite(x);}
 function furo(oral){if(nz(oral)&&oral>0)return{lo:oral,hi:2*oral,naive:false,txt:'1–2 × dobowa dawka doustna i.v.'};return{lo:20,hi:40,naive:true,txt:'20–40 mg i.v. (bez wcześniejszych diuretyków)'};}
 function ntg(sbp){var ok=nz(sbp)&&sbp>110;return{ok:ok,start:[10,20],max:200,txt:ok?'start 10–20 µg/min, ↑ do 200 µg/min':'SBP ≤110 – nitraty niewskazane'};}
 // stężenie w pompie: 50 mg/50 ml = 1 mg/ml = 1000 µg/ml → µg/min ×60/1000 = ml/h
-function ntgMlh(ugmin,concMgMl){return ugmin*60/(concMgMl*1000);}
+function ntgMlh(ugmin,concMgMl){return nz(ugmin)&&ugmin>=0&&ugmin<=400&&nz(concMgMl)&&concMgMl>0?ugmin*60/(concMgMl*1000):NaN;}
 function assess(i){var o={lvl:'ok',w:[]};
  if(nz(i.sbp)&&i.sbp<90){o.lvl='red';o.w.push('SBP <90 – wstrząs kardiogenny?');}
  if(nz(i.lac)&&i.lac>2){o.lvl='red';o.w.push('Mleczany >2 – hipoperfuzja');}

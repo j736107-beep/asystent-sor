@@ -6,12 +6,12 @@ var info=function(k,extra){return '<h3>Źródła</h3>'+src(B.SRC[k])+(extra||'')
 var ANA=tabbed({id:'ana',icon:'🐝',name:'Anafilaksja'},'Anafilaksja',[['a','Leczenie']],
  function(){return chk('bb','beta-bloker')+chk('refr','oporna (2 dawki i.m. bez poprawy)');},
  function(t,g,P){var w=P.w,a=B.adrIM(w,P.age),f=B.anaFluid(w,P.age),H='';
-  H+=bx('red','1. Adrenalina i.m. (1 mg/ml) – przednio-boczna część uda','<span class="big">'+F(a.mg,2)+' mg = '+F(a.ml,2)+' ml</span><div>Powtórz po 5 min, jeśli brak poprawy</div>'+(!(w>0)?'<div class="o">Brak masy – dawka dorosłego 0,5 mg</div>':''));
+  H+=bx('red','1. Adrenalina i.m. (1 mg/ml) – przednio-boczna część uda',(a.needW?'<span class="big">Podaj masę dziecka</span><div class="r">Niemowlę &lt;6 mies.: 0,01 mg/kg i.m. (ChPL) – dawka stała nie jest stosowana. Strzykawka 1 ml (0,01 ml/kg).</div>':'<span class="big">'+F(a.mg,3)+' mg = '+F(a.ml,3)+' ml</span><div>Powtórz po 5–15 min, jeśli brak poprawy (ChPL: 5–15 min)</div>'+(!(w>0)&&!(P.age<12)?'<div class="o">Brak masy – dawka dorosłego 0,5 mg</div>':'')+(a.note?'<div class="o">'+a.note+'</div>':''))+'<div class="mut">Roztwór 1 mg/ml (1:1000) tylko i.m.; do podania i.v. wymaga rozcieńczenia do 0,1 mg/ml (1:10 000) – ChPL.</div>');
   H+=bx('ok','2. Płyny','<b>'+(Array.isArray(f.ml)?'500–1000 ml':F(f.ml,0)+' ml')+'</b> krystaloidu i.v. szybko');
   if(g('refr'))H+=bx('red','Oporna','Wlew adrenaliny i.v. → moduł <b>Pompy SOR</b>'+dw('dawka startowa')+'; anestezjolog');
   if(g('bb')){var gl=B.glucagon();H+=bx('orange','Beta-bloker','<b>'+gl.txt+'</b>');}
   H+=bx('','','Tlen, pozycja leżąca. Antyhistaminiki i GKS – nie w pierwszej linii.');
-  return{H:H,lvl:'red'};},info('ana','<p>Adrenalina i.m.: 0,01 mg/kg, maks. 0,5 mg; dzieci 6–12 lat 0,3 mg, <6 lat 0,15 mg (ERC/RCUK). '+dw()+': wlew adrenaliny w anafilaksji opornej (RCUK: 1 mg/100 ml 0,5–1 ml/kg/h).</p>'));
+  return{H:H,lvl:'red'};},info('ana','<p>Adrenalina i.m.: 0,01 mg/kg, maks. 0,5 mg; dzieci: 6–12 lat 0,3 mg; 6 mies.–6 lat 0,15 mg; &lt;6 mies. 0,01 mg/kg (ChPL Adrenalina WZF, RCUK). '+dw()+': wlew adrenaliny w anafilaksji opornej (RCUK: 1 mg/100 ml 0,5–1 ml/kg/h).</p>'));
 // SEPSA
 var SEP=tabbed({id:'sepsis',icon:'🦠',name:'Sepsa'},'Sepsa – pakiet 1 h',[['b','Pakiet 1 h'],['abx','Antybiotyki']],
  function(t){return t==='b'?inp('sbp','SBP','mmHg')+inp('dbp','DBP','mmHg')+inp('lac','Mleczany','mmol/l'):'';},

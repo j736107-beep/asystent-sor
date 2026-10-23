@@ -62,7 +62,7 @@
     function f(x,d){return isFinite(x)?C.fmt(x,d):'—';}
     var cr=isFinite(p.crMg)?U.round('crea',U.fromSI('crea',U.toSI('crea',p.crMg,'conv'),S.units),S.units)+' '+U.label('crea',S.units):'—';
     var co=[['liver','wątroba'],['renal','nerki'],['heart','serce'],['preg','ciąża']].filter(function(x){return p.co&&p.co[x[0]];}).map(function(x){return x[1];});
-    return '<table><tr><th>Wiek / płeć</th><td>'+f(p.age,0)+' lat / '+({m:'M',f:'K'}[p.sex]||'—')+'</td><th>Masa / wzrost / BMI</th><td>'+f(p.w,1)+' kg / '+f(p.h,0)+' cm / '+(isFinite(p.bmi)?p.bmi.toFixed(1).replace('.',','):'—')+'</td></tr><tr><th>Kreatynina</th><td>'+esc(cr)+'</td><th>CrCl / eGFR</th><td>'+f(p.crcl,0)+' ml/min / '+f(p.egfr,0)+' ml/min/1,73 m²</td></tr><tr><th>Obciążenia</th><td colspan="3">'+(co.length?esc(co.join(', ')):'nie zaznaczono')+'</td></tr></table>';}
+    return '<table><tr><th>Wiek / płeć</th><td>'+f(p.age,0)+' lat / '+({m:'M',f:'K'}[p.sex]||'—')+'</td><th>Masa / wzrost / BMI</th><td>'+(isFinite(p.w)?f(p.w,1):isFinite(p.wRaw)?f(p.wRaw,1)+' (nierealna – nie użyta w obliczeniach)':'—')+' kg / '+f(p.h,0)+' cm / '+(isFinite(p.bmi)?p.bmi.toFixed(1).replace('.',','):'—')+'</td></tr><tr><th>Kreatynina</th><td>'+esc(cr)+'</td><th>CrCl / eGFR</th><td>'+f(p.crcl,0)+' ml/min / '+f(p.egfr,0)+' ml/min/1,73 m²</td></tr><tr><th>Obciążenia</th><td colspan="3">'+(co.length?esc(co.join(', ')):'nie zaznaczono')+'</td></tr></table>';}
   function section(title,html){return html?'<h2>'+esc(title)+'</h2>'+html:'';}
   function docHtml(){var W=root.SORWorkbench&&root.SORWorkbench.getState?root.SORWorkbench.getState():null;if(!W)return '';
     var txt=W.draft&&W.draft.trim()?W.draft:W.compose;if(!txt||!txt.trim())return '';
@@ -77,13 +77,14 @@
   var TITLES={doc:'Dokumentacja',done:'Co rzeczywiście wykonano',pumps:'Pompy – zapisane nastawy',fluid:'Bilans płynów',modules:'Moduły użyte u pacjenta'};
   function build(parts){
     parts=parts&&parts.length?parts:['doc','done','pumps','fluid','modules'];var out='',any=false;
+    var mids=[];parts.forEach(function(p){if(p==='modules')mids=mids.concat(Object.keys(snaps()));else if(p&&p.module)mids.push(p.module);else if(p==='pumps')mids.push('pompy');else if(p==='fluid')mids.push('fluid');});
     parts.forEach(function(p){var h='';
       if(p==='doc')h=docHtml();else if(p==='done')h=doneHtml();else if(p==='pumps')h=pumpsHtml();else if(p==='fluid')h=fluidHtml();else if(p==='modules')h=modulesHtml();
       else if(p&&p.module)h=modulesHtml([p.module]);
       if(h){any=true;out+=section(p&&p.module?'Moduł':TITLES[p],h);}});
     if(!any)out='<p><b>Brak danych do wydruku w wybranym zakresie.</b> Wypełnij moduł lub dodaj wpisy.</p>';
     var title=parts.length>=4?'Raport zbiorczy – Asystent lekarza SOR':'Wydruk – Asystent lekarza SOR';
-    return '<h1>'+title+'</h1><div class="sub">Wydruk: '+esc(now())+' (Europe/Warsaw) · Narzędzie pomocnicze – niecertyfikowane</div>'+section('Dane pacjenta',patientHtml())+out+
+    return '<h1>'+title+'</h1><div class="sub">Wydruk: '+esc(now())+' (Europe/Warsaw) · Narzędzie pomocnicze – niecertyfikowane</div>'+section('Dane pacjenta',patientHtml())+out+(any&&root.SORSources?root.SORSources.footerHtml(mids):'')+
       '<div class="sig"><div>Lekarz: .......................................</div><div>Podpis i pieczątka<br><br>.......................................</div></div><div class="foot">Asystent lekarza SOR – narzędzie pomocnicze, niecertyfikowane. Wartości i dawki weryfikuje lekarz; wydruk nie zastępuje dokumentacji medycznej szpitala.</div>';}
   function fill(parts){var a=document.getElementById('printArea');if(!a){a=document.createElement('div');a.id='printArea';document.body.appendChild(a);}a.innerHTML=build(parts);return a;}
   function print(parts){var cur=root.SKS&&root.SKS.active?root.SKS.active():null;if(cur)capture(cur);fill(parts);root.print();}

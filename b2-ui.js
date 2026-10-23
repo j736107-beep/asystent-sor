@@ -90,7 +90,7 @@ function sepCalc(t,g,P){
   var q=r.q,s=r.s,n=r.n;
   H+=bx(r.shock?'red':r.suspected?'orange':'ok',esc(r.msg),(r.shockPossible?'<div class="o">Wazopresor bez mleczanów: nie można potwierdzić wstrząsu septycznego (wymagane mleczany >2 mmol/l).</div>':'')+'<div class="mut">Rozpoznanie wg NPOA 2020/Sepsis-3: podejrzenie zakażenia + SOFA ≥2 pkt LUB qSOFA ≥2/3. SSC 2021 nie zaleca qSOFA jako jedynego narzędzia przesiewowego – dlatego pokazano też NEWS2.</div>');
   H+=tbl(['Skala','Wynik','Komentarz'],[
-   ['qSOFA (NPOA 2020: RR >22)',(q.complete?'':'co najmniej ')+q.score+'/3',q.complete?(q.positive?'<b class="r">dodatni (≥2)</b>':'ujemny'):'brak: '+esc(q.missing.join(', '))],
+   ['qSOFA (NPOA 2020: RR >22)',(q.complete?'':'co najmniej ')+q.score+'/3',(q.complete?(q.positive?'<b class="r">dodatni (≥2)</b>':'ujemny'):'brak: '+esc(q.missing.join(', ')))+(q.differs?'<div class="o">Sepsis-3 (RR ≥22, SBP ≤100): '+q.s3+'/3'+(q.positive3!==q.positive?' – '+(q.positive3?'DODATNI':'ujemny')+' – DO DECYZJI LEKARZA':'')+'</div>':'')],
    ['NEWS2',(n.complete?'':'co najmniej ')+n.score,esc(n.txt)+(n.complete?'':' · brak: '+esc(n.missing.join(', ')))],
    ['SOFA',(s.complete?'':'co najmniej ')+s.score+' (oceniono '+s.assessed+'/6 układów)',s.complete?'':'brak: '+esc(s.missing.join(', '))+' – nie liczono jako 0']]);
   if(s.parts.length)H+='<div class="mut">SOFA wg układów: '+s.parts.map(function(x){return esc(x[0])+' '+x[1];}).join(' · ')+'</div>';

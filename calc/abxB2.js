@@ -131,7 +131,10 @@ function qsofa(p){p=p||{};var rr=num(p.rr),sbp=num(p.sbp),alt=p.altered;var item
  if(nz(rr)&&rr>=4&&rr<=80)items.push(rr>22);else unk.push('RR');
  if(nz(sbp)&&sbp>=30&&sbp<=300)items.push(sbp<100);else unk.push('SBP');
  if(alt===true||alt===false)items.push(alt);else unk.push('świadomość');
- var s=items.filter(Boolean).length;return{score:s,known:items.length,missing:unk,complete:unk.length===0,positive:s>=2,note:'qSOFA – NPOA 2020: RR >22/min; SSC 2021 odradza qSOFA jako jedyne narzędzie przesiewowe.'};}
+ var s=items.filter(Boolean).length;
+ // 5.0-D: równolegle Sepsis-3 (Singer, JAMA 2016): RR ≥22, SBP ≤100 – wynik różny przy RR=22 lub SBP=100 jest pokazywany (ryzyko mylnej interpretacji)
+ var s3=(nz(rr)&&rr>=4&&rr<=80&&rr>=22?1:0)+(nz(sbp)&&sbp>=30&&sbp<=300&&sbp<=100?1:0)+(alt===true?1:0);
+ return{score:s,s3:s3,differs:s3!==s,known:items.length,missing:unk,complete:unk.length===0,positive:s>=2,positive3:s3>=2,note:'qSOFA – NPOA 2020: RR >22/min; SSC 2021 odradza qSOFA jako jedyne narzędzie przesiewowe.'};}
 function sofa(p){p=p||{};var parts=[],miss=[];
  var pf=num(p.pf),vent=p.vent===true;
  if(nz(pf)&&pf>=20&&pf<=700){parts.push(['układ oddechowy',pf>=400?0:pf>=300?1:pf>=200?2:(vent?(pf>=100?3:4):2)]);}else miss.push('PaO₂/FiO₂');

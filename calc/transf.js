@@ -14,7 +14,7 @@ function emergency(sex,age){var cb=(sex!=='m'&&sex!=='f')||(sex==='f'&&!(age>=50
 // KKCz: 1 j. ≈ +1 g/dl u dorosłego ~70 kg
 function rbcUnits(hb,target){if(!(isFinite(hb)&&isFinite(target))||target<=hb)return 0;return Math.ceil(target-hb-1e-9);}
 function threshold(ctx){if(ctx==='acs')return{t:8,txt:'ACS: ≤8 g/dl (ESC 2023); MINT 2023 – strategia liberalna <10 g/dl',dw:true};if(ctx==='cardiac')return{t:8,txt:'Choroba sercowo-naczyniowa / ortopedia: <8 g/dl (AABB 2023)'};return{t:7,txt:'Stabilny dorosły: <7 g/dl (AABB 2023)'};}
-function ffp(w){if(!(w>0))return null;return{ml:15*w,hi:20*w};}
+function ffp(w){if(!(w>0&&w<=250))return null;return{ml:15*w,hi:20*w};}
 function fib(w,f){var o={need:isFinite(f)&&f<1.5};if(w>0){o.concLo=25*w/1000;o.concHi=50*w/1000;}return o;}
 function plt(count,ctx){var t=ctx==='cns'?100:ctx==='bleed'?50:10;return{t:t,need:isFinite(count)&&count<t,dose:'1 dawka terapeutyczna (dorosły)'};}
 function txa(h){if(!isFinite(h))return{ok:null,txt:'Podaj czas od urazu'};if(h<=3)return{ok:true,txt:'1 g i.v. w 10 min, potem 1 g w 8 h'};return{ok:false,txt:'>3 h od urazu – nie podawać (CRASH-2)'};}

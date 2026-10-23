@@ -25,8 +25,12 @@ function drug(d){$('#title').textContent=d.name;$('#back').hidden=false;
   var n=s.amps[s.syr];if(ST&&ST.free){if(document.activeElement!==$('#a'))$('#a').value=n;}else $('#a').textContent=n;var p=E.prep(D,s.syr,n),o=$('#o'),pr=$('#pr');o.classList.remove('bad');$('#ds').classList.remove('bad');
   if(p.error){pr.innerHTML='<div class="err">'+esc(p.error)+'</div>';o.innerHTML='';$('#r').textContent=d.range.text;return;}
   var how=d.diluted?(E.fmt(p.drugVol)+' ml '+(ST?'z pena':'leku')+' + '+E.fmt(p.diluent)+' ml NaCl 0,9% (rozcieńczalnik) = '+s.syr+' ml'):(E.fmt(p.drugVol)+' ml nierozcieńczonego leku');
-  var cw=d.maxConc&&p.conc>d.maxConc.value+1e-9?'<div class="err">Stężenie powyżej limitu — '+esc(d.maxConc.text)+'</div>':'';
+  var cw=d.maxConc&&p.conc>d.maxConc.value+1e-9?'<div class="err">Stężenie powyżej limitu — '+esc(d.maxConc.text)+'. Wynik wstrzymany.</div>':'';
+  if(!cw&&d.minConc&&p.conc<d.minConc.value-1e-9)cw='<div class="err">Stężenie poniżej dolnego limitu — '+esc(d.minConc.text)+'. Wynik wstrzymany.</div>';
+  var blockedC=!!cw;
+  if(!cw&&d.softConc&&p.conc>d.softConc.value+1e-9)cw='<div class="warn">'+esc(d.softConc.text)+'</div>';
   pr.innerHTML='<div class="conc">Stężenie: <b>'+E.fmt(p.conc)+' '+c+'/ml</b> <small>('+E.fmt(p.amount)+' '+c+'; '+how+')</small></div>'+cw;
+  if(blockedC){o.innerHTML='<div class="s">Zmień ilość leku lub objętość strzykawki, aby stężenie mieściło się w limicie.</div>';$('#r').textContent=d.range.text;return;}
   var w=D.weight?num(s.w):1,ww=D.weight?E.checkWeight(w):null,wmsg='';
   if(D.weight){$('#w').classList.toggle('bad',ww==='red');if(ww==='red')wmsg='<div class="err">Nieprawidłowa masa ciała (30–250 kg) — nie liczę.</div>';else if(ww)wmsg='<div class="warn">Nietypowa masa ciała — sprawdź.</div>';}
   var dose,mlh;
@@ -34,6 +38,7 @@ function drug(d){$('#title').textContent=d.name;$('#back').hidden=false;
   if(s.last==='dose'){dose=num(s.dose);mlh=dose>=0?E.rate(D,p,dose,w):NaN;$('#ml').value=isFinite(mlh)?E.fmt(mlh):'';}
   else{mlh=num(s.mlh);dose=mlh>=0?E.dose(D,p,mlh,w):NaN;$('#ds').value=isFinite(dose)?E.fmt(dose):'';}
   if(!isFinite(mlh)||!isFinite(dose)){o.innerHTML=wmsg+'<div class="s">Wpisz dawkę lub ml/h</div>';$('#r').textContent=d.range.text;return;}
+  if(d.hard!=null&&D.doseUnit===d.doseUnit&&dose>d.hard+1e-9){o.innerHTML=wmsg+'<div class="err">'+esc(d.hardText||('Dawka powyżej twardego limitu '+d.hard+' '+u+' – nie liczę.'))+'</div>';var r0=$('#r');r0.textContent='POZA TWARDYM LIMITEM — '+d.range.text;r0.classList.add('bad');$('#ds').classList.add('bad');return;}
   var aph=E.amountPerHour(d,p,mlh),extra=c+'/h';var line=E.fmt(aph)+' '+extra;
   if(D.doseUnit.indexOf('/min')>0)line+=' = '+E.fmt(aph/60*(d.amp.unit==='mg'?1000:1))+' '+(d.amp.unit==='mg'?'µg':c)+'/min';
   if(d.id==='amiodaron')line+=' = '+E.fmt(aph*24)+' mg/24 h';

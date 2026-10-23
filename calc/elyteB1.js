@@ -37,7 +37,7 @@ function hypoNa(i){if(!(nz(i.na)&&i.na>=80&&i.na<=180))return null;var o={lvl:'o
  var w=i.w,tbw=w>0?w*tbwF(i.sex,i.age):NaN;o.tbw=tbw;
  if(w>0){o.d3=adrogue(naEff,NA3,tbw);o.d09=adrogue(naEff,NA09,tbw);o.bolusRise=o.d3*0.15;o.bolusAltMl=2*w;o.weightBolus=w>0;}
  var a=i.sympt;
- if(a==='severe'){o.steps.push({t:'3% NaCl – bolus',d:'150 ml 3% NaCl i.v. w 20 min (alternatywnie 2 ml/kg'+(w>0?' = '+Math.round(2*w)+' ml':'')+' przy nietypowej budowie ciała); kontrola Na⁺ po 20 min; powtórz do 2 razy lub do wzrostu Na⁺ o 5 mmol/l (maks. 3 dawki w 1. godzinie). Objawy ciężkie: drgawki, śpiączka, zatrzymanie oddechu, wymioty, GCS ≤8.',k:'red'});
+ if(a==='severe'){o.steps.push({t:'3% NaCl – bolus',d:'150 ml 3% NaCl i.v. w 20 min (alternatywnie 2 ml/kg'+(w>0?' = '+Math.round(2*w)+' ml':'')+' przy nietypowej budowie ciała); kontrola Na⁺ po 20 min; powtórz do 2 razy lub do wzrostu Na⁺ o 5 mmol/l (maks. 3 dawki w 1. godzinie). Objawy ciężkie: drgawki, śpiączka, zatrzymanie oddechu, wymioty, GCS ≤8. UWAGA – DO DECYZJI LEKARZA: ChPL NaCl 10% (Polpharma) zabrania podania nierozcieńczonego i w zatruciu wodnym podaje maks. 100 ml/h; bolus 150 ml/20 min (=450 ml/h) wg ESE 2014 przekracza ten zapis. Przygotowanie 3% NaCl wg lokalnej receptury (do uzupełnienia).',k:'red'});
   o.steps.push({t:'Po wzroście ≥5 mmol/l lub poprawie objawów',d:'Zakończ 3% NaCl; wolny dostęp żylny 0,9% NaCl w minimalnej objętości; lecz przyczynę. Brak poprawy po +5 mmol/l: kontynuuj 3% NaCl dążąc do +1 mmol/l/h, stop gdy objawy ustąpią, Na⁺ wzrośnie łącznie o 10 mmol/l lub osiągnie 130 mmol/l; Na⁺ co 4 h.',k:'red'});}
  else if(a==='mod'){o.steps.push({t:'3% NaCl – pojedynczy wlew',d:'150 ml 3% NaCl w 20 min (jednorazowo); cel +5 mmol/l/24 h; Na⁺ po 1, 6 i 12 h; leczenie przyczyny; odstaw leki wywołujące.',k:'orange'});}
  else{ // bez objawów / łagodne
@@ -54,7 +54,7 @@ function hypoNa(i){if(!(nz(i.na)&&i.na>=80&&i.na<=180))return null;var o={lvl:'o
 function finish(o){if(o.stop.length&&o.lvl==='ok')o.lvl='orange';return o;}
 // plan 3% NaCl na cel (Adrogué–Madias): ml i ml/h, z limitem
 function plan3(i){if(!(i.w>0&&nz(i.na)&&nz(i.target)&&i.target>0))return null;var tbw=i.w*tbwF(i.sex,i.age),d=adrogue(i.na,NA3,tbw);if(!(d>0))return null;
- var lim=i.highRisk?8:10,o={tbw:tbw,d3:d,vol:i.target/d*1000};o.mlh=o.vol/24;o.exceed=i.target>lim+1e-9;o.limit=lim;return o;}
+ var lim=i.highRisk?8:10,o={tbw:tbw,d3:d,vol:i.target/d*1000};o.mlh=o.vol/24;o.exceed=i.target>lim+1e-9;o.limit=lim;o.chplMaxMlh=100;o.chplExceed=o.mlh>100+1e-9;return o;}
 // kontrola postępu korekcji
 function progress(naStart,naNow,hours,highRisk){if(!(nz(naStart)&&nz(naNow)&&nz(hours)&&hours>0&&hours<=72))return null;var lim=highRisk?8:10,rise=naNow-naStart,per24=rise/hours*24;
  var o={rise:rise,perH:rise/hours,per24:per24,limit:lim,remaining:lim-rise,status:'ok'};
@@ -89,7 +89,7 @@ function hypoK(i){if(!nz(i.k)||i.k<=0||i.k>=8)return null;var o={lvl:'ok',steps:
  o.lvl=i.k<2.5||i.ecg?'red':'orange';
  var maxRate=i.k<3?20:10;o.maxRate=maxRate;
  if(i.k>=3.0&&!i.ecg&&!i.weak)o.steps.push({t:'Preferuj doustnie',d:'K⁺ 3,0–3,4 bez zmian EKG i bez niedowładu: doustnie (np. KCl 20–40 mmol), jeśli przewód pokarmowy sprawny.',k:'ok'});
- o.steps.push({t:'Dożylnie – zasady (ChPL KCl)',d:'Gotowy roztwór: KCl 15% rozcieńczyć (10 ml = 20 mmol → 500 ml; 20 ml = 40 mmol → 1000 ml): ≤40 mmol/l. Szybkość: ≤10 mmol/h przy K⁺ >3; ≤20 mmol/h przy K⁺ <3 z EKG/niedowładem (wyjątkowo 40 mmol/h – ciągłe EKG). ≤200 mmol/dobę. Nigdy nierozcieńczony ani bolus.',k:i.k<3?'red':'orange'});
+ o.steps.push({t:'Dożylnie – zasady (ChPL KCl)',d:'Roztwór użyć w ciągu 6 h od przygotowania; niezgodny z dobutaminą; nie podawać szybko do żyły centralnej (ChPL KCl WZF 15%). Gotowy roztwór: KCl 15% rozcieńczyć (10 ml = 20 mmol → 500 ml; 20 ml = 40 mmol → 1000 ml): ≤40 mmol/l. Szybkość: ≤10 mmol/h przy K⁺ >3; ≤20 mmol/h przy K⁺ <3 z EKG/niedowładem (wyjątkowo 40 mmol/h – ciągłe EKG). ≤200 mmol/dobę. Nigdy nierozcieńczony ani bolus.',k:i.k<3?'red':'orange'});
  o.steps.push({t:'Efekt',d:'10 mmol KCl ≈ +0,1 mmol/l K⁺ (ChPL, uproszczenie): kontrola K⁺ po każdych 20–40 mmol (co 1–2 h).',k:'ok'});
  o.steps.push({t:'Magnez',d:'Hipokaliemia często z hipomagnezemią – oznacz Mg i uzupełnij (oporna hipokaliemia).',k:'ok'});
  o.steps.push({t:'Dostęp',d:'Ból żyły obwodowej → dwie żyły lub duża żyła; przez cewnik centralny nie podawać zbyt szybko (ryzyko zatrzymania krążenia).',k:'ok'});
